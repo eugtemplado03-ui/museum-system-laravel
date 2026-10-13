@@ -46,6 +46,7 @@ Route::prefix('exhibits')->group(function () {
     Route::get('/{code}/ratings', [ExhibitController::class, 'ratings']);
     Route::post('/{code}/ratings', [ExhibitController::class, 'submitRating']);
     Route::post('/{code}/scan', [ExhibitController::class, 'scan']);
+    Route::post('/{code}/track', [ExhibitController::class, 'scan']);
 
     // Admin exhibit operations
     Route::middleware('jwt.auth:admin')->group(function () {
@@ -69,6 +70,8 @@ Route::prefix('visitors')->group(function () {
     Route::middleware('jwt.auth:admin')->group(function () {
         Route::get('/', [VisitorController::class, 'index']);
         Route::get('/stats', [VisitorController::class, 'stats']);
+        Route::post('/', [VisitorController::class, 'store']);
+        Route::delete('/{id}', [VisitorController::class, 'destroy']);
         Route::get('/{id}', [VisitorController::class, 'show']);
     });
 });

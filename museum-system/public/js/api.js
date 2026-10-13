@@ -139,7 +139,8 @@ const Api = (() => {
     qrUrl: (code) => `/api/exhibits/${encodeURIComponent(code)}/qr`,
     visitorCheckinQrUrl: () => `/api/visitors/checkin/qr`,
 
-    trackView: (code, source) => request(`/api/exhibits/${encodeURIComponent(code)}/track`, { method: 'POST', body: JSON.stringify({ source }) }).catch(()=>{}),
+    trackView: (code, source) => request(`/api/exhibits/${encodeURIComponent(code)}/track`, { method: 'POST', body: JSON.stringify({ source }) })
+      .catch((err) => { console.error('Could not record exhibit activity:', err); }),
 
     getRatings: (code) => request(`/api/exhibits/${encodeURIComponent(code)}/ratings`),
     submitRating: (code, rating, comment, visitorName) => request(`/api/exhibits/${encodeURIComponent(code)}/ratings`, {
@@ -179,7 +180,22 @@ const Api = (() => {
     updateGalleryItem: (id, payload) => request('/api/gallery/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
     deleteGalleryItem: (id) => request('/api/gallery/' + id, { method: 'DELETE' }),
 
-    listVisitors: (query = '') => request('/api/visitors' + (query ? (query.startsWith('?') ? query : '?' + query) : '')),
+    listVisitors: async (query = '') => {
+      const params = new URLSearchParams(query.replace(/^\?/, ''));
+      params.set('limit', '100');
+      params.set('page', '1');
+      const firstPage = await request('/api/visitors?' + params.toString());
+      const visitors = Array.isArray(firstPage.visitors) ? [...firstPage.visitors] : [];
+      const totalPages = Math.max(1, Number(firstPage.totalPages) || 1);
+
+      for (let page = 2; page <= totalPages; page++) {
+        params.set('page', String(page));
+        const result = await request('/api/visitors?' + params.toString());
+        if (Array.isArray(result.visitors)) visitors.push(...result.visitors);
+      }
+
+      return { ...firstPage, visitors };
+    },
     getVisitorStats: () => request('/api/visitors/stats'),
     getVisitor: (id) => request('/api/visitors/' + encodeURIComponent(id)),
     createVisitor: (payload) => request('/api/visitors', { method: 'POST', body: JSON.stringify(payload) }),

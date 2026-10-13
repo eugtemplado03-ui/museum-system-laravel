@@ -447,7 +447,7 @@ async function renderDashboardHomeTab(contentEl){
     exhibits.forEach(e => { const c = e.category || 'Other'; categoryCounts[c] = (categoryCounts[c] || 0) + 1; });
 
     // Recent visitors (last 5)
-    const recentVisitors = [...visitors].sort((a,b) => new Date(b.createdAt || b.visitDate || 0) - new Date(a.createdAt || a.visitDate || 0)).slice(0, 5);
+    const recentVisitors = [...visitors].sort((a,b) => new Date(b.checkInTime || b.visitDate || 0) - new Date(a.checkInTime || a.visitDate || 0)).slice(0, 5);
 
     // Upcoming events (next 3)
     const now = new Date();

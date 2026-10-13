@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +11,7 @@ class Visitor extends Model
     use HasFactory;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -47,6 +49,9 @@ class Visitor extends Model
         'groupName',
         'groupType',
         'tourGuide',
+        'visitDate',
+        'visitTime',
+        'status',
         'checkInTime',
         'checkOutTime',
         'isCheckedIn',
@@ -82,23 +87,48 @@ class Visitor extends Model
         return $this->attributes['tour_guide'] ?? null;
     }
 
+    private function getCheckInTimeInMuseumTimezone(): ?Carbon
+    {
+        $value = $this->attributes['check_in_time'] ?? null;
+
+        return $value
+            ? Carbon::parse($value, 'UTC')->setTimezone('Asia/Manila')
+            : null;
+    }
+
+    public function getVisitDateAttribute()
+    {
+        return $this->getCheckInTimeInMuseumTimezone()?->toDateString();
+    }
+
+    public function getVisitTimeAttribute()
+    {
+        return $this->getCheckInTimeInMuseumTimezone()?->format('H:i');
+    }
+
+    public function getStatusAttribute()
+    {
+        return $this->getIsCheckedInAttribute() ? 'Checked-in' : 'Checked-out';
+    }
+
     public function getCheckInTimeAttribute()
     {
-        $val = $this->attributes['check_in_time'] ?? null;
-        if (!$val) return null;
-        return is_string($val) ? $val : \Carbon\Carbon::parse($val)->toISOString();
+        return $this->getCheckInTimeInMuseumTimezone()?->toIso8601String();
     }
 
     public function getCheckOutTimeAttribute()
     {
         $val = $this->attributes['check_out_time'] ?? null;
-        if (!$val) return null;
-        return is_string($val) ? $val : \Carbon\Carbon::parse($val)->toISOString();
+        if (! $val) {
+            return null;
+        }
+
+        return Carbon::parse($val, 'UTC')->setTimezone('Asia/Manila')->toIso8601String();
     }
 
     public function getIsCheckedInAttribute()
     {
-        return (bool)($this->attributes['is_checked_in'] ?? true);
+        return (bool) ($this->attributes['is_checked_in'] ?? true);
     }
 
     public function artifactLogs()
