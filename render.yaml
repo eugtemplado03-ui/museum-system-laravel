@@ -26,7 +26,7 @@ services:
       - key: SEED_ADMIN_USER
         value: admin
       - key: SEED_ADMIN_PASS
-        generateValue: true
+        sync: false
       - key: SITE_NAME
         value: Museo Sang Bata sa Negros
       - key: OPENROUTER_MODEL
