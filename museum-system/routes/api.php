@@ -13,11 +13,20 @@ use App\Http\Controllers\MuseumInfoController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\TtsController;
 use App\Http\Controllers\VisitorController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 // Health check
 Route::get('/health', function () {
-    return response()->json(['ok' => true, 'database' => 'connected']);
+    try {
+        DB::connection()->getPdo();
+
+        return response()->json(['ok' => true, 'database' => 'connected']);
+    } catch (Throwable $exception) {
+        report($exception);
+
+        return response()->json(['ok' => false, 'database' => 'disconnected'], 503);
+    }
 });
 
 // Authentication routes
