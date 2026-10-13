@@ -699,6 +699,40 @@
         setStatus('', false);
       }
 
+      function speakWithBrowser(textToSpeak, currentSeq, language) {
+        if (!('speechSynthesis' in window)) return false;
+
+        try {
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          utterance.lang = {
+            tl: 'fil-PH',
+            cb: 'ceb-PH',
+            hil: 'hil-PH',
+            en: 'en-US'
+          }[language] || 'en-US';
+          utterance.onstart = () => {
+            if (currentSeq === _ttsSeq) setStatus('🔊 Playing with your device voice…', true);
+          };
+          utterance.onend = () => {
+            if (currentSeq === _ttsSeq) stopAudio();
+          };
+          utterance.onerror = (event) => {
+            if (currentSeq === _ttsSeq && event.error !== 'canceled' && event.error !== 'interrupted') {
+              console.warn('[TTS speak] browser speech failed:', event.error);
+              stopAudio();
+              setStatus('Audio unavailable.', false);
+            }
+          };
+
+          window.speechSynthesis.speak(utterance);
+          setStatus('⏳ Starting device voice…', true);
+          return true;
+        } catch (error) {
+          console.warn('[TTS speak] browser speech could not start:', error);
+          return false;
+        }
+      }
+
       window.stopExhibitDescAudio = stopAudio;
 
       // ── Translate via OpenRouter or use pre-stored curated translation ──
@@ -739,10 +773,10 @@
         }
         const currentSeq = ++_ttsSeq;
         _ttsAbortCtrl = new AbortController();
+        const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
 
         try {
           setStatus('⏳ Generating audio…', true);
-          const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -774,8 +808,22 @@
           if (e.name === 'AbortError') return;
           if (currentSeq === _ttsSeq) {
             console.warn('[TTS speak] server TTS failed:', e);
-            stopAudio();
-            setStatus('Audio unavailable — check connection.', false);
+            _ttsAbortCtrl = null;
+            if (_audioEl) {
+              _audioEl.onplay = null;
+              _audioEl.onended = null;
+              _audioEl.onerror = null;
+              try { _audioEl.pause(); } catch (cleanupError) {}
+              try { _audioEl.removeAttribute('src'); } catch (cleanupError) {}
+              _audioEl = null;
+            }
+            if (_audioUrl) {
+              try { URL.revokeObjectURL(_audioUrl); } catch (cleanupError) {}
+              _audioUrl = null;
+            }
+            if (!speakWithBrowser(textToSpeak, currentSeq, currentLang)) {
+              setStatus('Audio unavailable — check connection.', false);
+            }
           }
         }
       }

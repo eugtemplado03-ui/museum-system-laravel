@@ -19,13 +19,11 @@ services:
         value: Museo Sang Bata sa Negros
       - key: OPENROUTER_MODEL
         value: openai/gpt-4o-mini
-      - key: FISH_AUDIO_MODEL
-        value: s2.1-pro-free
       - key: OPENROUTER_API_KEY
         sync: false
       - key: TRANSLATION_API_KEY
         sync: false
-      - key: FISH_AUDIO_API_KEY
+      - key: GROQ_API_KEY
         sync: false
       - key: MONGODB_URI
         sync: false
