@@ -13,7 +13,7 @@ A comprehensive museum web system built with **PHP 8.2+ / Laravel 12**, pre-conf
   - **SQLite (Zero Config)**: Instant standalone file-based database for development.
 - **JWT Authentication**: Secure bcrypt token-based auth for admin dashboard and museum curators.
 - **Automated Seeder**: Pre-loaded with all real exhibits, marine galleries, programs, events, and curator accounts.
-- **AI Chatbot**: Trilingual museum guide (English, Hiligaynon, Cebuano, Tagalog) powered by OpenRouter.
+- **AI Chatbot**: Multilingual museum guide powered by Groq.
 - **Visitor Check-In Kiosk**: Automated visitor pass generation with scannable QR passes.
 
 ---
@@ -92,7 +92,7 @@ php artisan test --filter MuseumApiTest
 The repository root contains a Render Blueprint for the Laravel Docker web service. The Blueprint deploys the app in Oregon to match the existing Render PostgreSQL database.
 
 1. In Render, choose **New → Blueprint**, then connect `eugtemplado03-ui/museum-system-laravel` on the `main` branch.
-2. When prompted, set `DB_URL` to the database's **internal URL** from its **Connect** menu. Set `SEED_ADMIN_PASS` to a strong password you can retain; it becomes the initial password for the `admin` account. Add `GROQ_API_KEY` and `OPENROUTER_API_KEY` if you want voice synthesis and chatbot/translation features enabled.
+2. When prompted, set `DB_URL` to the database's **internal URL** from its **Connect** menu. Set `SEED_ADMIN_PASS` to a strong password you can retain; it becomes the initial password for the `admin` account. Add `GROQ_API_KEY` if you want voice synthesis, chatbot, and translation features enabled.
 3. Review and apply the Blueprint. Render builds `museum-system/Dockerfile`. On startup, the app runs non-destructive database migrations and seeds the initial museum content only if the exhibits table is empty.
 4. Sign in to the admin portal using username `admin` and the `SEED_ADMIN_PASS` you set before deploying.
 5. Visit the service's `/api/health` URL. It checks the live database connection and returns HTTP 503 if the database is unavailable.

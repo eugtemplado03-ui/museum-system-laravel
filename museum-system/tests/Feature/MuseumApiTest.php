@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Exhibit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class MuseumApiTest extends TestCase
@@ -109,6 +110,14 @@ class MuseumApiTest extends TestCase
 
     public function test_chat_assistant_returns_reply(): void
     {
+        Http::fake([
+            'https://api.groq.com/openai/v1/chat/completions' => Http::response([
+                'choices' => [
+                    ['message' => ['content' => 'The museum opens at 8 AM.']],
+                ],
+            ]),
+        ]);
+
         $response = $this->postJson('/api/chat', [
             'message' => 'What are your museum hours?',
             'language' => 'en',

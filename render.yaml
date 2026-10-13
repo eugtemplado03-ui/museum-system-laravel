@@ -29,9 +29,7 @@ services:
         sync: false
       - key: SITE_NAME
         value: Museo Sang Bata sa Negros
-      - key: OPENROUTER_MODEL
-        value: openai/gpt-4o-mini
-      - key: OPENROUTER_API_KEY
-        sync: false
+      - key: GROQ_CHAT_MODEL
+        value: openai/gpt-oss-120b
       - key: GROQ_API_KEY
         sync: false

@@ -37,6 +37,7 @@ return [
 
     'groq' => [
         'key' => env('GROQ_API_KEY'),
+        'chat_model' => env('GROQ_CHAT_MODEL', 'openai/gpt-oss-120b'),
     ],
 
 ];
